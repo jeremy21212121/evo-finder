@@ -1,0 +1,15 @@
+{
+  "name": "evo-finder",
+  "version": "1.0.0",
+  "description": "dev dependencies for evo-finder frontend",
+  "main": "gulpfile.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jeremy poole",
+  "license": "MIT",
+  "devDependencies": {
+    "browser-sync": "^2.24.5",
+    "gulp": "^3.9.1"
+  }
+}
