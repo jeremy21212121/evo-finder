@@ -48,15 +48,13 @@ L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=p
 
 let currentLocation;
 let myMarker;
-const cars = [];
-const carMarkers = [];
+let cars = [];
+let carMarkers = [];
 
-const panToCurrentLocation = (zoom=14) => {
-   // mymap.setZoom(zoom);
-   mymap.flyTo(currentLocation,zoom);
-   // mymap.setZoom(zoom);
-   // mymap.setZoomAround(currentLocation,zoom);
-}
+// const panToCurrentLocation = (zoom=14) => {
+//
+//    mymap.flyTo(currentLocation,zoom);
+// }
 const geoDist = (lat1, lon1, lat2, lon2) => {
   //returns distance, in meters, between two sets of co-ordinates
   const toRadians = (deg) => deg * Math.PI / 180;
@@ -67,42 +65,38 @@ const geoDist = (lat1, lon1, lat2, lon2) => {
   return Math.acos( Math.sin(latRad1)*Math.sin(latRad2) + Math.cos(latRad1)*Math.cos(latRad2) * Math.cos(lonDiffRad) ) * R;
 }
 
-const sortByDistance = (evoCarArray) =>
-  evoCarArray.sort((a,b)=>{
-    const [lat,lon] = [...currentLocation];
-    let aDist = geoDist(lat,lon,a.Lat,a.Lon);
-    let bDist = geoDist(lat,lon,b.Lat,b.Lon);
-    if (aDist < bDist) { return -1; }
-    if (aDist > bDist) { return 1; }
-    return 0;
-  })
+// const sortByDistance = (evoCarArray) =>
+//   evoCarArray.sort((a,b)=>{
+//     const [lat,lon] = [...currentLocation];
+//     let aDist = geoDist(lat,lon,a.Lat,a.Lon);
+//     let bDist = geoDist(lat,lon,b.Lat,b.Lon);
+//     if (aDist < bDist) { return -1; }
+//     if (aDist > bDist) { return 1; }
+//     return 0;
+//   })
 
-const getCars = (url,arr) =>
-  fetch(url)
-  .then(resp => resp.json(), err=>console.log(err))
-  .then(json => arr.push(...json.data))
-  .catch(err => console.log(err));
 
-const setCarMarkers = (evoCarArray) => {
-  const max = 5;
 
-  for (let i=0; i<max; i++) {
-    carMarkers.push(
-      L.marker( [cars[i].Lat, cars[i].Lon], {
-        icon: L.icon({
-          iconUrl:'img/blackMarker.png',
-          iconSize:[25,25]
-        })
-      }).addTo(mymap)
-    );
-    carMarkers[i].bindPopup(
-      `<b>${cars[i].Name}</b><br>
-      fuel: ${cars[i].Fuel}%<br>
-      distance: ${Math.round(geoDist(currentLocation[0],currentLocation[1],cars[i].Lat,cars[i].Lon))}m`
-    )
-  }
-
-}
+// const setCarMarkers = (evoCarArray) => {
+//   const max = 5;
+//
+//   for (let i=0; i<max; i++) {
+//     carMarkers.push(
+//       L.marker( [cars[i].Lat, cars[i].Lon], {
+//         icon: L.icon({
+//           iconUrl:'img/blackMarker.png',
+//           iconSize:[25,25]
+//         })
+//       }).addTo(mymap)
+//     );
+//     carMarkers[i].bindPopup(
+//       `<b>${cars[i].Name}</b><br>
+//       fuel: ${cars[i].Fuel}%<br>
+//       distance: ${Math.round(geoDist(currentLocation[0],currentLocation[1],cars[i].Lat,cars[i].Lon))}m`
+//     )
+//   }
+//
+// }
 
 const carsLoaded = async () => {
   await getCars('js/demo.json',cars);
@@ -111,27 +105,102 @@ const carsLoaded = async () => {
   panToCurrentLocation(14);
 }
 
-const setCurrentLocation = (lat,lon,cb) => {
-  currentLocation = [lat,lon];
-  if (cb) { cb(); }
-  carsLoaded();
+// const setCurrentLocation = (lat,lon,cb) => {
+//   currentLocation = [lat,lon];
+//   if (cb) { cb(); }
+//   carsLoaded();
+// }
+//
+// const setMyMarker = () => myMarker = L.marker(currentLocation).addTo(mymap);
+//  // mymap.setZoom(16) && mymap.setView(currentLocation)
+
+// const getLocation = () => {
+//   if ("geolocation" in navigator) {
+//     navigator.geolocation.getCurrentPosition((pos) => setCurrentLocation(pos.coords.latitude,pos.coords.longitude,setMyMarker),(err)=>console.log(err));
+//   } else {
+//     console.log('No geolocation service found');
+//   }
+// }
+
+const setCarMarkers = () => {
+  new Promise((resolve) => {
+    const max = 5;
+    carMarkers = []; //init markers array in case its not the first time
+    for (let i=0; i<max; i++) {
+      carMarkers.push(
+        L.marker( [cars[i].Lat, cars[i].Lon], {
+          icon: L.icon({
+            iconUrl:'img/blackMarker.png',
+            iconSize:[25,25]
+          })
+        }).addTo(mymap)
+      );
+      carMarkers[i].bindPopup(
+        `<b>${cars[i].Name}</b><br>
+        fuel: ${cars[i].Fuel}%<br>
+        distance: ${Math.round(geoDist(currentLocation[0],currentLocation[1],cars[i].Lat,cars[i].Lon))}m`
+      );
+    }
+    resolve();
+  })
+
+
 }
 
-const setMyMarker = () => myMarker = L.marker(currentLocation).addTo(mymap);
- // mymap.setZoom(16) && mymap.setView(currentLocation)
-
-const getLocation = () => {
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition((pos) => setCurrentLocation(pos.coords.latitude,pos.coords.longitude,setMyMarker),(err)=>console.log(err));
-  } else {
-    console.log('No geolocation service found');
-  }
-}
-
-
-
-
+const sortByDistance = (evoCarArray) =>
+  new Promise((resolve)=>{
+    evoCarArray.sort((a,b)=>{
+      const [lat,lon] = [...currentLocation];
+      let aDist = geoDist(lat,lon,a.Lat,a.Lon);
+      let bDist = geoDist(lat,lon,b.Lat,b.Lon);
+      if (aDist < bDist) { return -1; }
+      if (aDist > bDist) { return 1; }
+      return 0;
+    });
+    resolve();
+  });
 
 
-window.addEventListener('DOMContentLoaded',getLocation);
+const getCars = (url) =>
+  new Promise((resolve,reject) => {
+    cars = [];//init cars array in case this is not the first time calling api
+    fetch(url)
+    .then(resp => resp.json(), err => reject(err))
+    .then(json => cars.push(...json.data))
+    .catch(err => console.log(err))
+    .finally(()=>resolve())
+  });
+
+
+const setMyMarker = () =>
+  new Promise( (resolve) => {
+    L.marker(currentLocation).addTo(mymap);
+    resolve();
+  });
+
+const setCurrentLocation = (lat,lon) =>
+  new Promise( (resolve) => {
+    currentLocation = [lat,lon];
+    resolve();
+});
+
+
+mymap.addEventListener('locationfound',(loc)=>{
+  setCurrentLocation(loc.latitude,loc.longitude)
+  .then(() => setMyMarker() )
+  .then(() => getCars('js/demo.json') )
+  .then(() => sortByDistance(cars) )
+  .then(() => setCarMarkers() )
+  .finally(() => mymap.flyTo(currentLocation,14) )
+});
+mymap.addEventListener('locationerror',(err)=>{console.log(err)});
+mymap.locate({
+  watch: false,
+  setView: false,
+  maxZoom: Infinity,
+  timeout: 10000,
+  maximumAge: 0,
+  enableHighAccuracy: false
+})
+// window.addEventListener('DOMContentLoaded',getLocation);
 // window.addEventListener('loaded',panToCurrentLocation);
