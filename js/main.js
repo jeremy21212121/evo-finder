@@ -1,42 +1,5 @@
-// const statusP = document.querySelector('.status');
-// const statusContainer = document.querySelector('.heading');
-// statusContainer.style.maxHeight = '0px';
-
-
-const statusBar = {
-  p: document.querySelector('.status'),
-  container: document.querySelector('.heading'),
-  closeButton: document.querySelector('.close'),
-  toggle: () => {
-
-    if (statusBar.container.style.maxHeight === '0px') {
-      statusBar.container.style.maxHeight = '40px';
-    } else {
-      statusBar.container.style.maxHeight = '0px';
-    }
-  },
-  write: (str) => {
-    statusBar.p.innerText = str;
-  },
-  popup: (str) => {
-    statusBar.write(str);
-    statusBar.container.style.maxHeight = '40px';
-  }
-};
-statusBar.container.style.maxHeight = '0px';
-statusBar.closeButton.addEventListener('click',statusBar.toggle)
-
-
-// const toggleMaxHeight = (el) => {
-//   if (el.style.maxHeight === '0px') {
-//     el.style.maxHeight = '40px';
-//   } else {
-//     el.style.maxHeight = '0px';
-//   }
-// }
-
-
-const mymap = L.map('mapid').setView([49.2609325, -123.112955], 13);
+const mymap = L.map('mapid',{messagebox: true}).setView([49.2609325, -123.112955], 13);
+mymap.messagebox.options.timeout = 10000;
 
 L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
   attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
@@ -51,10 +14,7 @@ let myMarker;
 let cars = [];
 let carMarkers = [];
 
-// const panToCurrentLocation = (zoom=14) => {
-//
-//    mymap.flyTo(currentLocation,zoom);
-// }
+
 const geoDist = (lat1, lon1, lat2, lon2) => {
   //returns distance, in meters, between two sets of co-ordinates
   const toRadians = (deg) => deg * Math.PI / 180;
@@ -65,65 +25,10 @@ const geoDist = (lat1, lon1, lat2, lon2) => {
   return Math.acos( Math.sin(latRad1)*Math.sin(latRad2) + Math.cos(latRad1)*Math.cos(latRad2) * Math.cos(lonDiffRad) ) * R;
 }
 
-// const sortByDistance = (evoCarArray) =>
-//   evoCarArray.sort((a,b)=>{
-//     const [lat,lon] = [...currentLocation];
-//     let aDist = geoDist(lat,lon,a.Lat,a.Lon);
-//     let bDist = geoDist(lat,lon,b.Lat,b.Lon);
-//     if (aDist < bDist) { return -1; }
-//     if (aDist > bDist) { return 1; }
-//     return 0;
-//   })
-
-
-
-// const setCarMarkers = (evoCarArray) => {
-//   const max = 5;
-//
-//   for (let i=0; i<max; i++) {
-//     carMarkers.push(
-//       L.marker( [cars[i].Lat, cars[i].Lon], {
-//         icon: L.icon({
-//           iconUrl:'img/blackMarker.png',
-//           iconSize:[25,25]
-//         })
-//       }).addTo(mymap)
-//     );
-//     carMarkers[i].bindPopup(
-//       `<b>${cars[i].Name}</b><br>
-//       fuel: ${cars[i].Fuel}%<br>
-//       distance: ${Math.round(geoDist(currentLocation[0],currentLocation[1],cars[i].Lat,cars[i].Lon))}m`
-//     )
-//   }
-//
-// }
-
-const carsLoaded = async () => {
-  await getCars('js/demo.json',cars);
-  sortByDistance(cars);
-  setCarMarkers(cars);
-  panToCurrentLocation(14);
-}
-
-// const setCurrentLocation = (lat,lon,cb) => {
-//   currentLocation = [lat,lon];
-//   if (cb) { cb(); }
-//   carsLoaded();
-// }
-//
-// const setMyMarker = () => myMarker = L.marker(currentLocation).addTo(mymap);
-//  // mymap.setZoom(16) && mymap.setView(currentLocation)
-
-// const getLocation = () => {
-//   if ("geolocation" in navigator) {
-//     navigator.geolocation.getCurrentPosition((pos) => setCurrentLocation(pos.coords.latitude,pos.coords.longitude,setMyMarker),(err)=>console.log(err));
-//   } else {
-//     console.log('No geolocation service found');
-//   }
-// }
 
 const setCarMarkers = () => {
-  new Promise((resolve) => {
+  new Promise((resolve,reject) => {
+    if (cars.length === 0) { reject('Error loading cars.') }
     const max = 5;
     carMarkers = []; //init markers array in case its not the first time
     for (let i=0; i<max; i++) {
@@ -143,34 +48,41 @@ const setCarMarkers = () => {
     }
     resolve();
   })
-
-
 }
 
 const sortByDistance = (evoCarArray) =>
-  new Promise((resolve)=>{
-    evoCarArray.sort((a,b)=>{
-      const [lat,lon] = [...currentLocation];
-      let aDist = geoDist(lat,lon,a.Lat,a.Lon);
-      let bDist = geoDist(lat,lon,b.Lat,b.Lon);
-      if (aDist < bDist) { return -1; }
-      if (aDist > bDist) { return 1; }
-      return 0;
-    });
+  new Promise((resolve, reject)=>{
+    try {
+      evoCarArray.sort((a,b)=>{
+        const [lat,lon] = [...currentLocation];
+        let aDist = geoDist(lat,lon,a.Lat,a.Lon);
+        let bDist = geoDist(lat,lon,b.Lat,b.Lon);
+        if (aDist < bDist) { return -1; }
+        if (aDist > bDist) { return 1; }
+        return 0;
+      });
+    }
+    catch(err) {
+      reject( Error(`Interal Error: ${err.message}`) )
+    }
     resolve();
   });
-
 
 const getCars = (url) =>
   new Promise((resolve,reject) => {
     cars = [];//init cars array in case this is not the first time calling api
     fetch(url)
-    .then(resp => resp.json(), err => reject(err))
+    .then(resp => {
+      if (!resp.ok) {
+        reject( Error(`Error getting car data: ${resp.status}`) );
+      }
+      return resp.json();
+    })
     .then(json => cars.push(...json.data))
-    .catch(err => console.log(err))
-    .finally(()=>resolve())
-  });
+    .then(()=>resolve())
+    .catch(err => reject(err))
 
+  });
 
 const setMyMarker = () =>
   new Promise( (resolve) => {
@@ -184,6 +96,7 @@ const setCurrentLocation = (lat,lon) =>
     resolve();
 });
 
+const handleError = (err) => mymap.messagebox.show(`${err.message}`);
 
 mymap.addEventListener('locationfound',(loc)=>{
   setCurrentLocation(loc.latitude,loc.longitude)
@@ -191,9 +104,10 @@ mymap.addEventListener('locationfound',(loc)=>{
   .then(() => getCars('js/demo.json') )
   .then(() => sortByDistance(cars) )
   .then(() => setCarMarkers() )
-  .finally(() => mymap.flyTo(currentLocation,14) )
+  .then(() => mymap.flyTo(currentLocation,14) )
+  .catch( err => handleError(err) )
 });
-mymap.addEventListener('locationerror',(err)=>{console.log(err)});
+mymap.addEventListener('locationerror', (err) => handleError(err) );
 mymap.locate({
   watch: false,
   setView: false,
@@ -201,6 +115,4 @@ mymap.locate({
   timeout: 10000,
   maximumAge: 0,
   enableHighAccuracy: false
-})
-// window.addEventListener('DOMContentLoaded',getLocation);
-// window.addEventListener('loaded',panToCurrentLocation);
+});
