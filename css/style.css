@@ -29,3 +29,21 @@ body {
   text-align: center;
   line-height: 2;
 }
+
+.leaflet-container a.book-button {
+  display: block;
+  margin: 5px auto;
+  border-radius: 4px;
+  background-color: #00BCE2;
+  color: #333;
+  text-align: center;
+  text-decoration: none;
+  line-height: 1.7;
+}
+
+.leaflet-container a.book-button:active {
+  box-shadow: 1px 1px 1px 0px #333;
+}
+.leaflet-container a.book-button:hover {
+  box-shadow: 2px 2px 1px 0px #333;
+}

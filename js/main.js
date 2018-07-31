@@ -29,7 +29,7 @@ const geoDist = (lat1, lon1, lat2, lon2) => {
 const setCarMarkers = () => {
   new Promise((resolve,reject) => {
     if (cars.length === 0) { reject('Error loading cars.') }
-    const max = 5;
+    const max = 10;
     carMarkers = []; //init markers array in case its not the first time
     for (let i=0; i<max; i++) {
       carMarkers.push(
@@ -43,7 +43,9 @@ const setCarMarkers = () => {
       carMarkers[i].bindPopup(
         `<b>${cars[i].Name}</b><br>
         fuel: ${cars[i].Fuel}%<br>
-        distance: ${Math.round(geoDist(currentLocation[0],currentLocation[1],cars[i].Lat,cars[i].Lon))}m`
+        distance: ${Math.round(geoDist(currentLocation[0],currentLocation[1],cars[i].Lat,cars[i].Lon))}m
+        <a class="book-button" href="https://fo.evo.vulog.com/bcaa-front/Account/FindCars?id=${cars[i].Id}">Book This Car</a>
+        `
       );
     }
     resolve();
@@ -97,6 +99,7 @@ const setCurrentLocation = (lat,lon) =>
 });
 
 const handleError = (err) => mymap.messagebox.show(`${err.message}`);
+
 
 mymap.addEventListener('locationfound',(loc)=>{
   setCurrentLocation(loc.latitude,loc.longitude)
