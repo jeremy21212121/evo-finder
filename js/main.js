@@ -1,3 +1,4 @@
+
 const mymap = L.map('mapid',{messagebox: true}).setView([49.2609325, -123.112955], 13);
 mymap.messagebox.options.timeout = 10000;
 
@@ -23,7 +24,7 @@ const geoDist = (lat1, lon1, lat2, lon2) => {
     lonDiffRad = toRadians(lon2-lon1),
     R = 6371e3;
   return Math.acos( Math.sin(latRad1)*Math.sin(latRad2) + Math.cos(latRad1)*Math.cos(latRad2) * Math.cos(lonDiffRad) ) * R;
-}
+};
 
 
 const setCarMarkers = () => {
@@ -74,15 +75,15 @@ const getCars = (url) =>
   new Promise((resolve,reject) => {
     cars = [];//init cars array in case this is not the first time calling api
     fetch(url)
-    .then(resp => {
-      if (!resp.ok) {
-        reject( Error(`Error getting car data: ${resp.status}`) );
-      }
-      return resp.json();
-    })
-    .then(json => cars.push(...json.data))
-    .then(()=>resolve())
-    .catch(err => reject(err))
+      .then(resp => {
+        if (!resp.ok) {
+          reject( Error(`Error getting car data: ${resp.status}`) );
+        }
+        return resp.json();
+      })
+      .then(json => cars.push(...json.data))
+      .then(()=>resolve())
+      .catch(err => reject(err))
 
   });
 
@@ -103,12 +104,12 @@ const handleError = (err) => mymap.messagebox.show(`${err.message}`);
 
 mymap.addEventListener('locationfound',(loc)=>{
   setCurrentLocation(loc.latitude,loc.longitude)
-  .then(() => setMyMarker() )
-  .then(() => getCars('js/demo.json') )
-  .then(() => sortByDistance(cars) )
-  .then(() => setCarMarkers() )
-  .then(() => mymap.flyTo(currentLocation,14) )
-  .catch( err => handleError(err) )
+    .then(() => setMyMarker() )
+    .then(() => getCars('http://localhost:8675/cars') )
+    .then(() => sortByDistance(cars) )
+    .then(() => setCarMarkers() )
+    .then(() => mymap.flyTo(currentLocation,14) )
+    .catch( err => handleError(err))
 });
 mymap.addEventListener('locationerror', (err) => handleError(err) );
 mymap.locate({
