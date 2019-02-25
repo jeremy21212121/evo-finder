@@ -6,6 +6,6 @@ This will be part of a planned "evo-sniper" service that will auto-book a car fo
 
 ## note
 
-As currently configured, it uses a static ```demo.json``` file to populate the cars. This is because the [evo api](https://evo.ca/api/Cars.aspx) response doesn't include a CORS header and, as such, cannot be used in a cross-domain manner.
+As currently configured, this requires the use of my [evo-api-wrapper](https://github.com/jeremy21212121/evo-api-wrapper) to proxy calls to the evo API. This is because the [evo api](https://evo.ca/api/Cars.aspx) response doesn't include a CORS header and, as such, cannot be used in a cross-domain manner.
 
-Please see my "evo-api-wrapper" repo for a node backend that adds the CORS header to the response.
+If you want to try it without running the backend, check out the "demo" branch. It calls to the ```demo.json``` file instead of the real api.
