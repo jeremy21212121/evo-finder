@@ -1,6 +1,6 @@
 # Evo-finder
 
-A re-implementation of evo.ca/find-a-car using mapbox. This implementation shows the X number of cars closest to your location (as the crow flies, compensating for the curvature of the earth). 
+A re-implementation of evo.ca/find-a-car using mapbox. This implementation shows the 10 cars closest to your location (as the crow flies, compensating for the curvature of the earth).
 
 This will be part of a planned "evo-sniper" service that will auto-book a car for you when one is dropped off nearby. This is a for-fun project, making something I would like to use.
 
