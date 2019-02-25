@@ -105,7 +105,7 @@ const handleError = (err) => mymap.messagebox.show(`${err.message}`);
 mymap.addEventListener('locationfound',(loc)=>{
   setCurrentLocation(loc.latitude,loc.longitude)
     .then(() => setMyMarker() )
-    .then(() => getCars('http://localhost:8675/cars') )
+    .then(() => getCars('./js/demo.json') )
     .then(() => sortByDistance(cars) )
     .then(() => setCarMarkers() )
     .then(() => mymap.flyTo(currentLocation,14) )
